@@ -187,8 +187,15 @@ submission</code></pre>
 <pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
 ##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
 ## Levels: A B C D E</code></pre>
-<p>Write the files necessary for submission. # Write files for submission MLfiles &lt;- function(x){ n = length(x) for(i in 1:n){ filename = paste0(“p”,i,“.txt”) write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names =FALSE)} }</p>
-<p>MLfiles(submission)</p>
+<p>Write the files necessary for submission.</p>
+<pre class="r"><code>MLfiles &lt;- function(x){
+           n = length(x)
+           for(i in 1:n){
+           filename = paste0(&quot;p&quot;,i,&quot;.txt&quot;)
+           write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names                =FALSE)}
+}
+
+MLfiles(submission)</code></pre>
 </div>
 
 
