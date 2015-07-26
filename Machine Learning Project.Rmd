@@ -21,8 +21,9 @@ set.seed(777)
 
 Load datasets.
 ```{r}
-download.file(url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfile = "MLtrain.csv")
-download.file(url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfile = "MLtest.csv")
+setwd("C:\\Users\\Ryan\\Documents\\R")
+#download.file(url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfile = "MLtrain.csv")
+#download.file(url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfile = "MLtest.csv")
 MLtrain <- read.csv("MLtrain.csv")
 MLtest <- read.csv("MLtest.csv")
 ```
