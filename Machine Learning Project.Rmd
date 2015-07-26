@@ -1,0 +1,83 @@
+---
+title: "Coursera Machine Learning Project"
+author: "Ryan Emerson"
+date: "Friday, July 24, 2015"
+output: html_document
+---
+
+## Introduction
+Using devices such Jawbone Up, Nike Fuelband, & FitBit  it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, the goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har.
+
+## Data Processing
+Load libraries and set seed for reproducibility.
+```{r}
+library(caret)
+library(randomForest)
+library(rpart)
+library(rpart.plot)
+library(dplyr)
+set.seed(777)
+```
+
+Load datasets.
+```{r}
+download.file(url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfile = "MLtrain.csv")
+download.file(url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfile = "MLtest.csv")
+MLtrain <- read.csv("MLtrain.csv")
+MLtest <- read.csv("MLtest.csv")
+```
+
+The number of variables in our data sets is a lot to handle. Let's see if we can eliminate variables that would not be useful.
+```{r}
+# exclude variables that are not relevant to a machine learning excersize
+MLtrain <- select(MLtrain, c(-X, -user_name, -raw_timestamp_part_1, -raw_timestamp_part_2, -cvtd_timestamp, -new_window, -num_window))
+
+# Exclude columns with over 50% NAs
+NAs <- apply(MLtrain,2,function(x) {sum(is.na(x))})
+MLtrain <- MLtrain[,which(NAs <  nrow(MLtrain)*0.5)]   
+
+# exclude near zero variance features
+NZV <- nearZeroVar(MLtrain)
+MLtrain <- MLtrain[, -NZV]
+```
+
+Now we'll convert the classe variable to a factor and split the MLtrain data set into two datasets (one for training and one for testing) for cross validation.
+```{r}
+index <- createDataPartition(y = MLtrain$classe, p=0.6,list=FALSE)
+trainPart <- MLtrain[index,]
+testPart <- MLtrain[-index,]
+```
+
+## Analysis
+A few machine learning algorithms were explored for this analysis, but the random forest model performed the best. That is, it correctly predicted the outcome of the classe variable with the highest level of accuracy. Now we'll use a random forest model on our data in order to predict how well the weightlifting excersize was performed.
+```{r}
+# run random forest model on training data
+MLmodel <- randomForest(classe ~. , data=trainPart, method="class")
+MLmodel
+
+# predict test data set based on random forest model
+MLpredict <- predict(MLmodel, testPart, type = "class")
+# test results on test partition of training dataset
+confusionMatrix(MLpredict, testPart$classe)
+
+# use Variance Importance Plot to see the importance of the variables
+varImpPlot(MLmodel)
+```
+As we can see, the random forest model predicted the outcome of the classe variable with 99.29% accuracy. Therefore, the random forest model was chosen as our machine learning algorithm. The expected out of sample error from this model is 0.71%. Given that our test data set has 20 cases, we would expect that none of these cases would be improperly identified.
+
+## Programming Assignment
+```{r}
+submission <- predict(MLmodel, MLtest)
+submission
+```
+
+Write the files necessary for submission.
+# Write files for submission
+MLfiles <- function(x){
+           n = length(x)
+           for(i in 1:n){
+           filename = paste0("p",i,".txt")
+           write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names                =FALSE)}
+}
+
+MLfiles(submission)
